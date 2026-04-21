@@ -7,6 +7,10 @@ DATA_DIR = BASE_DIR / "data"
 CHARACTERS_DIR = DATA_DIR / "characters"
 SESSIONS_ARCHIVE_DIR = DATA_DIR / "sessions"
 
+# ── GitHub release publishing ──
+GITHUB_REPO  = os.environ.get("GITHUB_REPO",  "doughatcher/game-telemetry")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+
 # ── External services (override via .env or environment) ──
 OLLAMA_BASE  = os.environ.get("OLLAMA_BASE",  "http://localhost:11434")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma4:e4b")

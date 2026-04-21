@@ -653,31 +653,28 @@ body {
 }
 #panel-next .panel-body { counter-reset: next-step; }
 
-/* Map panel — Mermaid diagram */
+/* Map panel — Cytoscape */
 #panel-map .panel-body,
 #map-tab-ascii {
   padding: 10px 12px;
 }
-#panel-map .panel-body pre,
-#panel-map .panel-body .mermaid {
+#panel-map .panel-body pre {
   font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
   font-size: 11px;
   line-height: 1.6;
-  color: var(--text2);
-  white-space: pre;
-  overflow-x: auto;
+  color: var(--text3);
+  white-space: pre-wrap;
+  word-break: break-word;
   margin: 0;
 }
-#panel-map .panel-body .mermaid svg {
-  max-width: 100%;
-  height: auto;
+.cy-container {
+  width: 100%;
+  height: 180px;
+  background: transparent;
 }
-/* Mermaid dark theme overrides */
-#panel-map .mermaid .node rect,
-#panel-map .mermaid .node circle,
-#panel-map .mermaid .node polygon { fill: var(--surface2) !important; stroke: var(--sep2) !important; }
-#panel-map .mermaid .edgeLabel { background: var(--bg) !important; color: var(--text3) !important; }
-#panel-map .mermaid text { fill: var(--text2) !important; font-family: inherit !important; font-size: 11px !important; }
+#map-tab-ascii .cy-container {
+  height: 420px;
+}
 
 /* ── Panel flash on update ── */
 @keyframes panel-flash {

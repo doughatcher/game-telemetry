@@ -17,7 +17,8 @@ from watchfiles import awatch
 
 from .config import (
     BASE_DIR, SESSION_DIR, CHARACTERS_DIR, SESSIONS_ARCHIVE_DIR,
-    PANEL_FILES, TRANSCRIPT_FILE, STATE_FILE, AUDIO_DIR
+    PANEL_FILES, TRANSCRIPT_FILE, STATE_FILE, AUDIO_DIR,
+    GITHUB_REPO, GITHUB_TOKEN
 )
 from . import gemma, stt
 
@@ -398,22 +399,79 @@ async def end_session():
         for f in AUDIO_DIR.glob("chunk_*.webm"):
             f.unlink()
 
+    # Build release body from archived panels
+    release_url = None
+    session_name = "Session"
+    try:
+        state_data = json.loads((archive_dir / "state.json").read_text()) if (archive_dir / "state.json").exists() else {}
+        session_name = state_data.get("session_name") or "Session"
+    except Exception:
+        pass
+
+    def _panel_text(name):
+        p = archive_dir / PANEL_FILES[name].name
+        if not p.exists():
+            return ""
+        return p.read_text().replace(f"## PANEL: {name}\n\n", "").strip()
+
+    scene    = _panel_text("scene")
+    story    = _panel_text("story-log")
+    nextstep = _panel_text("next-steps")
+    release_body = f"""## {session_name}
+**Date:** {ts[:10]}  **Time:** {ts[11:13]}:{ts[13:]}
+
+### Scene
+{scene or "_No scene recorded._"}
+
+### Story Log
+{story or "_No story log._"}
+
+### Next Steps
+{nextstep or "_No next steps recorded._"}
+"""
+
     # Commit archived session to git
-    git_msg = f"Session archive: {ts}"
+    tag = f"session-{ts}"
+    git_msg = f"Session archive: {session_name} ({ts})"
+    committed = False
     try:
         subprocess.run(["git", "add", str(archive_dir)], cwd=str(BASE_DIR), capture_output=True)
-        result = subprocess.run(
-            ["git", "commit", "-m", git_msg],
-            cwd=str(BASE_DIR), capture_output=True, text=True
-        )
-        if result.returncode == 0:
+        r = subprocess.run(["git", "commit", "-m", git_msg], cwd=str(BASE_DIR), capture_output=True, text=True)
+        committed = r.returncode == 0
+        if committed:
             print(f"[session] Git commit: {git_msg}")
         else:
-            print(f"[session] Git commit skipped: {result.stderr.strip()}")
+            print(f"[session] Git commit skipped: {r.stderr.strip()}")
     except Exception as e:
         print(f"[session] Git commit failed: {e}")
 
-    return {"ok": True, "archived_to": str(archive_dir), "recording": recording_path}
+    # Push and create GitHub release
+    if committed and GITHUB_REPO:
+        try:
+            subprocess.run(["git", "push", "origin", "main"], cwd=str(BASE_DIR), capture_output=True, text=True)
+            print(f"[session] Pushed to origin/main")
+        except Exception as e:
+            print(f"[session] Push failed: {e}")
+
+        try:
+            gh_cmd = [
+                "gh", "release", "create", tag,
+                "--repo", GITHUB_REPO,
+                "--title", f"{session_name} — {ts[:10]}",
+                "--notes", release_body,
+            ]
+            if recording_path:
+                gh_cmd += [recording_path]
+            r = subprocess.run(gh_cmd, cwd=str(BASE_DIR), capture_output=True, text=True)
+            if r.returncode == 0:
+                release_url = r.stdout.strip()
+                print(f"[session] GitHub release: {release_url}")
+            else:
+                print(f"[session] Release failed: {r.stderr.strip()}")
+        except Exception as e:
+            print(f"[session] Release creation failed: {e}")
+
+    return {"ok": True, "archived_to": str(archive_dir), "recording": recording_path, "release_url": release_url}
 
 
 @app.get("/api/sessions")

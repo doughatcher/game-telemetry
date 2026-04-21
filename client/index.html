@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>DnD Stage</title>
   <link rel="stylesheet" href="/static/style.css">
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { fontSize: '11px' } });
-    window._mermaid = mermaid;
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3/dist/cytoscape.min.js"></script>
 </head>
 <body>
 
@@ -101,7 +97,7 @@
       <span id="map-modal-title">&#8862; Map</span>
       <div id="map-modal-tabs">
         <button class="map-tab" data-tab="vtt">D&amp;D Beyond</button>
-        <button class="map-tab active" data-tab="ascii">ASCII Map</button>
+        <button class="map-tab active" data-tab="ascii">Map Data</button>
       </div>
       <button id="map-modal-close">&#10005;</button>
     </div>

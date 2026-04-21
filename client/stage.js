@@ -101,27 +101,128 @@ function renderScene(content) {
     (detail ? `<p class="scene-detail">${md_inline(escHtml(detail))}</p>` : '');
 }
 
-let _lastAsciiMap = '';
+let _lastMapContent = '';
+let _cyInstance = null;
 
-async function renderMap(content, el) {
-  let stripped = content
-    .replace(/^## PANEL:.*$/mg, '')
-    .replace(/^```[a-z]*\n?/mg, '')
-    .replace(/^```$/mg, '')
-    .replace(/^[-*]\s+\*\*[^*]+\*\*:?\s*/mg, '')
-    .trim();
-  _lastAsciiMap = stripped;
-  const modalAscii = document.getElementById('map-modal-ascii');
-  if (modalAscii) modalAscii.textContent = stripped;
-  if (window._mermaid && /^(graph|flowchart)/m.test(stripped)) {
-    try {
-      const id = 'mmap' + Date.now();
-      const { svg } = await window._mermaid.render(id, stripped);
-      el.innerHTML = `<div class="mermaid">${svg}</div>`;
-      return;
-    } catch (e) { /* fall through to pre */ }
+function _parseMapData(content) {
+  const nodes = [], edges = [], here = {};
+  const lines = content.replace(/^## PANEL:.*$/mg, '').split('\n');
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line.startsWith('node:')) {
+      const parts = line.slice(5).split('|').map(s => s.trim());
+      if (parts.length >= 2) nodes.push({ id: parts[0], label: parts[1], type: parts[2] || 'room' });
+    } else if (line.startsWith('edge:')) {
+      const parts = line.slice(5).split('|').map(s => s.trim());
+      if (parts.length >= 2) edges.push({ from: parts[0], to: parts[1], label: parts[2] || '' });
+    } else if (line.startsWith('here:')) {
+      const parts = line.slice(5).split('|').map(s => s.trim());
+      if (parts.length >= 2) here[parts[0]] = parts[1];
+    }
   }
-  el.innerHTML = `<pre>${escHtml(stripped)}</pre>`;
+  return { nodes, edges, here };
+}
+
+const NODE_COLORS = {
+  room: '#2a3a4a', dungeon: '#2a2030', building: '#2a3530',
+  outdoors: '#1e3020', area: '#2a3a4a', water: '#1a2840', default: '#2a3040'
+};
+
+function renderMapCytoscape(data, el) {
+  el.innerHTML = '<div class="cy-container" id="cy-map"></div>';
+  const cyEl = el.querySelector('#cy-map');
+
+  const charsByNode = {};
+  for (const [char, nodeId] of Object.entries(data.here)) {
+    if (!charsByNode[nodeId]) charsByNode[nodeId] = [];
+    charsByNode[nodeId].push(char.split(' ')[0]); // first name only
+  }
+
+  const elements = [];
+  for (const n of data.nodes) {
+    const chars = charsByNode[n.id] || [];
+    const badge = chars.length ? `\n[${chars.join(',')}]` : '';
+    elements.push({
+      data: { id: n.id, label: n.label + badge, type: n.type, hasChars: chars.length > 0 }
+    });
+  }
+  for (let i = 0; i < data.edges.length; i++) {
+    elements.push({
+      data: { id: `e${i}`, source: data.edges[i].from, target: data.edges[i].to, label: data.edges[i].label }
+    });
+  }
+
+  if (typeof window.cytoscape === 'undefined') return;
+
+  if (_cyInstance) { _cyInstance.destroy(); _cyInstance = null; }
+
+  _cyInstance = window.cytoscape({
+    container: cyEl,
+    elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': (ele) => NODE_COLORS[ele.data('type')] || NODE_COLORS.default,
+          'border-color': '#3a5060',
+          'border-width': 1,
+          'label': 'data(label)',
+          'color': '#c8d8e0',
+          'font-size': '10px',
+          'font-family': 'inherit',
+          'text-wrap': 'wrap',
+          'text-max-width': '80px',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'width': 'label',
+          'height': 'label',
+          'padding': '8px',
+          'shape': 'round-rectangle',
+        }
+      },
+      {
+        selector: 'node[?hasChars]',
+        style: {
+          'border-color': '#5090b0',
+          'border-width': 2,
+          'background-color': '#1a3a50',
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 1,
+          'line-color': '#3a5060',
+          'target-arrow-color': '#3a5060',
+          'target-arrow-shape': 'none',
+          'curve-style': 'bezier',
+          'label': 'data(label)',
+          'font-size': '9px',
+          'color': '#6a8090',
+          'text-background-color': '#141b22',
+          'text-background-opacity': 1,
+          'text-background-padding': '2px',
+        }
+      }
+    ],
+    layout: { name: 'cose', padding: 20, animate: false, nodeRepulsion: 4000, idealEdgeLength: 80 },
+    userZoomingEnabled: true,
+    userPanningEnabled: true,
+    boxSelectionEnabled: false,
+    autoungrabify: true,
+  });
+}
+
+function renderMap(content, el) {
+  _lastMapContent = content;
+  const data = _parseMapData(content);
+  // Fall back to text if no structured data found
+  if (data.nodes.length === 0) {
+    const stripped = content.replace(/^## PANEL:.*$/mg, '').trim();
+    el.innerHTML = `<pre>${escHtml(stripped)}</pre>`;
+    return;
+  }
+  renderMapCytoscape(data, el);
 }
 
 function setPanel(name, content) {
@@ -148,7 +249,8 @@ function setPanel(name, content) {
 function openMapModal() {
   const overlay = document.getElementById('map-modal-overlay');
   const asciiEl = document.getElementById('map-modal-ascii');
-  asciiEl.textContent = _lastAsciiMap || '(No ASCII map yet — start session and wait for update)';
+  // Show raw map data in the ASCII tab for reference
+  asciiEl.textContent = _lastMapContent.replace(/^## PANEL:.*$/mg, '').trim() || '(No map yet — start session and wait for update)';
   // Restore saved URL/cookie inputs
   const savedUrl = localStorage.getItem('ddb-map-url') || '';
   const savedCookie = localStorage.getItem('ddb-cookie') || '';
@@ -715,7 +817,9 @@ async function endSession() {
   stopRecording();
   const resp = await fetch('/api/session/end', { method: 'POST' });
   const data = await resp.json();
-  alert('Session archived.');
+  let msg = 'Session archived.';
+  if (data.release_url) msg += `\n\nGitHub release:\n${data.release_url}`;
+  alert(msg);
   sessionStart = null;
   document.getElementById('timer').textContent = '0:00:00';
   resetLogState();

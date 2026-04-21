@@ -66,7 +66,16 @@ Line 1: ONE punchy sentence (≤12 words, present tense, vivid, no "the party").
 3-5 bullets. Each bullet: ≤7 words, starts with a verb, no full sentences. If shopping/downtime, suggest specific items by class.
 
 ## PANEL: map
-(Mermaid graph TD diagram showing locations and connections — use node labels for rooms/areas, edge labels for paths/doors. Include character positions if known. No ASCII art, no prose.)
+Output ONLY lines in exactly these formats (no prose, no markdown):
+node: ID | Label | type
+edge: FromID | ToID | label
+here: CharacterName | NodeID
+Types: room, area, outdoors, water, building, dungeon
+Example:
+node: docks | The Docks | outdoors
+node: tavern | Rusty Anchor | building
+edge: docks | tavern | alley
+here: Rides the Wake | docks
 
 ## DECISION: (ONLY include this block if there is an active, clear choice being discussed right now — shopping options, path splits, tactical decisions. OMIT entirely if no active decision.)
 TITLE: (one short question, e.g. "What should Rides the Wake buy?")
