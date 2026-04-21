@@ -683,6 +683,109 @@ body {
 }
 .panel.updated { animation: panel-flash 1.5s ease-out; }
 
+/* ── Start session overlay ── */
+#start-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+#start-overlay.open { display: flex; }
+#start-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  max-width: 280px;
+}
+#start-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+#start-box p {
+  font-size: 13px;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+#btn-start-session {
+  width: 100%;
+  padding: 11px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+#btn-start-session:hover { opacity: 0.85; }
+#btn-start-load-history {
+  width: 100%;
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid var(--sep2);
+  border-radius: 10px;
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+#btn-start-load-history:hover { background: var(--surface); color: var(--text); }
+
+/* ── Review banner ── */
+#review-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: rgba(74,127,165,0.1);
+  border-bottom: 1px solid rgba(74,127,165,0.25);
+  font-size: 12px;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+#review-banner.hidden { display: none; }
+.review-label {
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+#review-session-info {
+  flex: 1;
+  color: var(--text3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#btn-exit-review { margin-left: auto; flex-shrink: 0; }
+
+/* ── Load into stage button (history modal) ── */
+#btn-load-into-stage {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+#btn-load-into-stage:hover { opacity: 0.85; }
+#btn-load-into-stage.hidden { display: none; }
+
 /* ── Character select overlay ── */
 #char-select-overlay {
   display: none;

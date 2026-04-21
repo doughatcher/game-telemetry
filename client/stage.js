@@ -631,6 +631,49 @@ function renderState(state) {
 let ws;
 let wsConnected = false;
 let wsInitReceived = false;
+let _sessionMode = 'idle'; // 'idle' | 'live' | 'reviewing'
+
+function setSessionMode(mode) {
+  _sessionMode = mode;
+  const startOverlay = document.getElementById('start-overlay');
+  const reviewBanner = document.getElementById('review-banner');
+  if (startOverlay) startOverlay.classList.toggle('open', mode === 'idle');
+  if (reviewBanner) reviewBanner.classList.toggle('hidden', mode !== 'reviewing');
+}
+
+function startSession() {
+  setSessionMode('live');
+  startRecording().catch(err => console.warn('Mic denied:', err));
+}
+
+async function loadHistoryIntoStage(ts) {
+  if (isRecording) stopRecording();
+  closeHistory();
+  const data = (_historyCurrentTs === ts && _historyCurrentData)
+    ? _historyCurrentData
+    : await fetch(`/api/sessions/${ts}`).then(r => r.json()).catch(() => null);
+  if (!data) { alert('Failed to load session.'); return; }
+
+  resetLogState();
+  if (data.scene)      setPanel('scene', data.scene);
+  if (data.map)        setPanel('map', data.map);
+  if (data.next_steps) setPanel('next-steps', data.next_steps);
+  if (data.story_log)  syncStoryBeats(data.story_log);
+  if (data.transcript) renderTranscript(data.transcript);
+  if (data.state)      renderState(data.state);
+
+  const name = data.state?.session_name || ts;
+  document.getElementById('review-session-info').textContent = `${name} · ${ts}`;
+  setSessionMode('reviewing');
+  requestAnimationFrame(() => { const lb = document.getElementById('log-body'); if (lb) lb.scrollTop = lb.scrollHeight; });
+}
+
+function exitReview() {
+  resetLogState();
+  setSessionMode('idle');
+  if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+  else connectWS();
+}
 
 function resetLogState() {
   const logBody = document.getElementById('log-body');
@@ -666,6 +709,9 @@ function loadFromInit(msg) {
   });
 
   wsInitReceived = true;
+  const _hasSession = _lastTranscriptLineCount > 0;
+  setSessionMode(_hasSession ? 'live' : 'idle');
+  if (_hasSession) startRecording().catch(err => console.warn('Mic denied on resume:', err));
 }
 
 function connectWS() {
@@ -678,6 +724,7 @@ function connectWS() {
   };
 
   ws.onmessage = (e) => {
+    if (_sessionMode === 'reviewing') return;
     const msg = JSON.parse(e.data);
     if (msg.type === 'init') {
       loadFromInit(msg);
@@ -823,6 +870,7 @@ async function endSession() {
   sessionStart = null;
   document.getElementById('timer').textContent = '0:00:00';
   resetLogState();
+  setSessionMode('idle');
 }
 
 // ── Character modal ──
@@ -934,6 +982,7 @@ async function loadHistorySession(ts, itemEl) {
     } else {
       recLink.classList.add('hidden');
     }
+    document.getElementById('btn-load-into-stage').classList.remove('hidden');
     renderHistoryTab(_historyCurrentTab);
   } catch (e) {
     document.getElementById('history-tab-body').innerHTML = '<div style="color:var(--red)">Failed to load session.</div>';
@@ -1024,11 +1073,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     showCharSelectOverlay();
   }
 
-  // Auto-start recording
-  startRecording().catch(() => {
-    // Mic permission denied or unavailable — user can start manually
-  });
-
   // Button bindings
   document.getElementById('rec-indicator').addEventListener('click', toggleRecording);
   document.getElementById('btn-update').addEventListener('click', forceUpdate);
@@ -1037,6 +1081,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-save-char').addEventListener('click', saveCharacter);
   document.getElementById('btn-cancel-char').addEventListener('click', closeModal);
   document.getElementById('decision-close').addEventListener('click', closeDecision);
+  document.getElementById('btn-start-session').addEventListener('click', startSession);
+  document.getElementById('btn-start-load-history').addEventListener('click', () => {
+    document.getElementById('start-overlay').classList.remove('open');
+    openHistory();
+  });
+  document.getElementById('btn-load-into-stage').addEventListener('click', () => {
+    if (_historyCurrentTs) loadHistoryIntoStage(_historyCurrentTs);
+  });
+  document.getElementById('btn-exit-review').addEventListener('click', exitReview);
   document.getElementById('btn-history').addEventListener('click', openHistory);
   document.getElementById('history-close').addEventListener('click', closeHistory);
   document.getElementById('history-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeHistory(); });

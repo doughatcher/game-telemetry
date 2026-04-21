@@ -9,6 +9,16 @@
 </head>
 <body>
 
+<!-- Session start overlay (shown when no active session) -->
+<div id="start-overlay">
+  <div id="start-box">
+    <div id="start-title">&#9876; DnD Stage</div>
+    <p>No session in progress.</p>
+    <button id="btn-start-session">&#9654; Start New Session</button>
+    <button id="btn-start-load-history">&#8635; Load Past Session</button>
+  </div>
+</div>
+
 <!-- Character selection overlay (shown on first load if no character chosen) -->
 <div id="char-select-overlay">
   <div id="char-select-box">
@@ -17,6 +27,12 @@
     <div id="char-select-list"><!-- populated by JS --></div>
     <button class="btn" id="btn-observe" style="margin-top:12px;width:100%">Observe (no character)</button>
   </div>
+</div>
+
+<div id="review-banner" class="hidden">
+  <span class="review-label">&#8635; Reviewing:</span>
+  <span id="review-session-info"></span>
+  <button id="btn-exit-review" class="btn">&#10005; Back to Live</button>
 </div>
 
 <div id="header">
@@ -167,6 +183,7 @@
             <span id="history-detail-ts"></span>
             <span id="history-detail-name"></span>
             <a id="history-recording-link" class="hidden" href="#" target="_blank">&#9654; Recording</a>
+            <button id="btn-load-into-stage" class="hidden">Load into Stage</button>
           </div>
           <div id="history-tabs">
             <button class="history-tab active" data-tab="scene">Scene</button>
