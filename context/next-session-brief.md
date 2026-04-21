@@ -5,11 +5,11 @@
 LOCATION: Shard C — Sea of Governance (port/governance district, session start)
 
 PARTY:
-- Rides the Wake (Barbarian) 68/68 HP AC 12
-- Granite (Unknown) —/— HP AC —
-- Livrielle (Unknown) —/— HP AC —
-- Vardar (Unknown) —/— HP AC —
-- Edwin (Unknown) —/— HP AC —
+- Rides the Wake (Barbarian/Berserker, Human, Lvl 7) 68/68 HP AC 12
+- Granit (Cleric/Life Domain, Dwarf, Lvl 7) 52/52 HP AC 18
+- Lyvriele Enafrya (Fighter/Samurai, Eladrin, Lvl 7) 58/58 HP AC 17
+- Vargr Stormcaller (Bard/College of Spirits, Goliath, Lvl 7) 49/49 HP AC 14
+- Edwin (Lvl 7, class unknown) —/— HP AC —
 
 RECENT EVENTS:
 - Party arrived at Shard C, Sea of Governance — first foothold in this political region

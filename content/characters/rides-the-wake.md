@@ -1,12 +1,14 @@
 ---
-ac: 12
-class: Barbarian
+title: Rides the Wake
+slug: rides-the-wake
+class: Barbarian / Path of the Berserker
+race: Human
+level: 7
 hp_current: 68
 hp_max: 68
-last_updated: '2026-04-21'
-slug: rides-the-wake
+ac: 12
 status: alive
-title: Rides the Wake
+last_updated: '2026-04-21'
 ---
 
 Rides the Wake is a barbarian who carries herself like someone accustomed to moving through rough water — patient in stillness, overwhelming in motion. She is not reckless in the way people imagine barbarians to be; there is a current of deliberate purpose beneath the fury, a sense that the rage, when it comes, has been earned. Those who travel with her describe a quiet confidence that borders on the serene, right up until it doesn't.
