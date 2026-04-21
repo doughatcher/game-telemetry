@@ -1,6 +1,6 @@
 ---
 ac: 12
-class: Barbarian
+class: Barbarian / Path of the Berserker
 hp_current: 68
 hp_max: 68
 last_updated: '2026-04-21'
@@ -13,4 +13,4 @@ Rides the Wake is a barbarian who carries herself like someone accustomed to mov
 
 The Shard C — the Sea of Governance — has been reached at last, and if the effort of getting here shows on the others, it does not show on her. She was present for the arrival in the way she is present for most things: fully, without announcement. Whatever waits in a sea named for governance and power, she has not dressed it up into something more than it is. A place is a place. You enter it. You find out what it asks of you.
 
-There is something in the name "Sea of Governance" that suggests the world is about to become more formal, more structured, more weighted with consequence — and it remains to be seen how a force like Rides the Wake moves through that kind of water. If history is any guide, she will move through it exactly as she moves through everything else: like the wake itself, after the ship has already passed.
+The party has rested, resupplied, and readied itself. Rides the Wake arrives at the threshold of whatever comes next in the same condition she began: whole, unhurried, and ready. The Sea of Governance may be a place where power wears formal dress. She has never needed that kind of armor.

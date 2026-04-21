@@ -2,30 +2,28 @@
 
 *Auto-generated. Do not edit — will be overwritten after each session.*
 
-LOCATION: Shard C — Sea of Governance (docked/arrived, no active combat)
+LOCATION: Shard C — Sea of Governance (arrived end of session, no further exploration logged)
 
 PARTY:
-- Rides the Wake (Barbarian/Berserker, Human, Lvl 7) 68/68 HP AC 12
-- Granit (Cleric/Life Domain, Dwarf, Lvl 7) 52/52 HP AC 18
-- Lyvriele Enafrya (Fighter/Samurai, Eladrin, Lvl 7) 58/58 HP AC 17
-- Vargr Stormcaller (Bard/College of Spirits, Goliath, Lvl 7) 49/49 HP AC 14
+- Rides the Wake (Barbarian/Berserker) 68/68 HP AC 12
+- Granit (Cleric/Life Domain) 52/52 HP AC 18
+- Lyvriele Enafrya (Fighter/Samurai) 58/58 HP AC 17
+- Vargr Stormcaller (Bard/College of Spirits) 49/49 HP AC 14
 
 RECENT EVENTS:
-- Party arrived at Shard C, Sea of Governance — session's sole logged event
-- No combat occurred; party status is post-travel, pre-action
-- Character sheets incomplete for Granite, Livrielle, Vardar, Edwin — stats untracked
-- No NPCs encountered on record
-- No resources confirmed spent
+- Party arrived at Shard C in the Sea of Governance — first foothold in this political zone
+- No combat this session; arrival was uneventful or travel-focused
+- Session represents a transition point — end of one leg of journey, start of next
 
 OPEN THREADS:
-- Party must rest fully before next engagement
-- Rations need purchasing — provisions for journey not yet secured
-- Weapons require sharpening — combat readiness not confirmed
-- Local sea charts to be studied — destination/route still unknown
+- Full rest pending — party has not yet recovered stamina/resources post-travel
+- Rations must be purchased before next journey leg departs
+- Local sea charts need study — destination or route not yet determined
+- Weapons require maintenance before next expected combat engagement
 
 KEY NPCS:
-- None logged. Shard C contacts, merchants, or officials not yet established.
+- None logged — Shard C contacts, vendors, and political figures not yet encountered or named
 
-PARTY CONDITION: Rides the Wake is at full HP; all others lack tracked stats. Party appears unbloodied from travel but is under-provisioned and unprepared for immediate departure. Morale unrecorded — assume baseline pre-adventure readiness.
+PARTY CONDITION: All four characters are at full HP with no active conditions — physically fresh but logistically unprepared for the next leg. Resource expenditure from prior travel unknown; assume spell slots and class features may need confirmation after rest.
 
-CAMPAIGN CONTEXT: The Sea of Governance is a politically charged maritime region defined by trade routes, port power, and shard-based infrastructure. The party operates at Level 7 in a gritty, dangerous world where NPCs act independently and combat carries real consequence. Shard C represents a potential resupply and intelligence hub — local factions, maritime authorities, or merchant guilds may have interest in the party's movements. The next session opens with downtime tasks (rest, supplies, charts) that could organically introduce NPCs, rumors, or hooks before the party departs.
+CAMPAIGN CONTEXT: The Sea of Governance is a politically charged maritime region where trade routes, shard-based power structures, and naval authority intersect. Shard C is a node in this network — likely a port, administrative hub, or waystation with merchant traffic, local factions, and information to exploit. The world has agency; delays in resupply or chart study could mean missed intelligence or rivals moving first. Gritty tone means vendors may gouge, charts may be incomplete, and even a rest in port carries risk.
