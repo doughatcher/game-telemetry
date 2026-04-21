@@ -1,4 +1,4 @@
-# DnD Stage — Live Session Companion
+# Adventure Log — Live Session Companion
 
 A live D&D session companion that listens to your table, tracks HP and combat state in real time, generates narrative scene panels, and publishes a living campaign journal to GitHub Pages — all powered by local LLMs.
 

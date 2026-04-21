@@ -22,7 +22,7 @@ from .config import (
 )
 from . import gemma, stt
 
-app = FastAPI(title="DnD Stage")
+app = FastAPI(title="Adventure Log")
 
 # Serve static client files
 CLIENT_DIR = BASE_DIR / "client"
@@ -376,10 +376,40 @@ async def _refresh_party_panel():
 
 # --- Session archive ---
 
+class EndSessionRequest(BaseModel):
+    discard: bool = False
+
 @app.post("/api/session/end")
-async def end_session():
+async def end_session(req: EndSessionRequest = None):
     """Archive current session files and reset for next session."""
+    if req is None:
+        req = EndSessionRequest()
+
     ts = datetime.now().strftime("%Y-%m-%d-%H%M")
+
+    # Reset helper (shared by both paths)
+    def _reset():
+        TRANSCRIPT_FILE.write_text("# Session Transcript\n\n")
+        for name, path in PANEL_FILES.items():
+            path.write_text(f"## PANEL: {name}\n\n*New session.*\n")
+        STATE_FILE.write_text(json.dumps({
+            "session_name": "New Session",
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "location": "Unknown",
+            "combat_active": False,
+            "round": 0,
+            "initiative_order": [],
+            "characters": {},
+            "last_updated": None
+        }, indent=2))
+        if AUDIO_DIR.exists():
+            for f in AUDIO_DIR.glob("chunk_*.webm"):
+                f.unlink()
+
+    if req.discard:
+        _reset()
+        return {"ok": True, "discarded": True}
+
     archive_dir = SESSIONS_ARCHIVE_DIR / ts
     archive_dir.mkdir(parents=True, exist_ok=True)
 
@@ -413,24 +443,8 @@ async def end_session():
             print(f"[session] Recording failed: {e}")
         filelist.unlink(missing_ok=True)
 
-    # Reset files
-    TRANSCRIPT_FILE.write_text("# Session Transcript\n\n")
-    for name, path in PANEL_FILES.items():
-        path.write_text(f"## PANEL: {name}\n\n*New session.*\n")
-    STATE_FILE.write_text(json.dumps({
-        "session_name": "New Session",
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "location": "Unknown",
-        "combat_active": False,
-        "round": 0,
-        "initiative_order": [],
-        "characters": {},
-        "last_updated": None
-    }, indent=2))
-    # Clear audio chunks
-    if AUDIO_DIR.exists():
-        for f in AUDIO_DIR.glob("chunk_*.webm"):
-            f.unlink()
+    # Reset working files for next session
+    _reset()
 
     # Build release body from archived panels
     release_url = None

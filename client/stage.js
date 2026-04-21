@@ -103,6 +103,7 @@ function renderScene(content) {
 
 let _lastMapContent = '';
 let _cyInstance = null;
+let _cyModalInstance = null;
 
 function _parseMapData(content) {
   const nodes = [], edges = [], here = {};
@@ -128,88 +129,71 @@ const NODE_COLORS = {
   outdoors: '#1e3020', area: '#2a3a4a', water: '#1a2840', default: '#2a3040'
 };
 
-function renderMapCytoscape(data, el) {
-  el.innerHTML = '<div class="cy-container" id="cy-map"></div>';
-  const cyEl = el.querySelector('#cy-map');
-
+function _buildCytoscapeElements(data) {
   const charsByNode = {};
   for (const [char, nodeId] of Object.entries(data.here)) {
     if (!charsByNode[nodeId]) charsByNode[nodeId] = [];
-    charsByNode[nodeId].push(char.split(' ')[0]); // first name only
+    charsByNode[nodeId].push(char.split(' ')[0]);
   }
-
   const elements = [];
   for (const n of data.nodes) {
     const chars = charsByNode[n.id] || [];
     const badge = chars.length ? `\n[${chars.join(',')}]` : '';
-    elements.push({
-      data: { id: n.id, label: n.label + badge, type: n.type, hasChars: chars.length > 0 }
-    });
+    elements.push({ data: { id: n.id, label: n.label + badge, type: n.type, hasChars: chars.length > 0 } });
   }
   for (let i = 0; i < data.edges.length; i++) {
-    elements.push({
-      data: { id: `e${i}`, source: data.edges[i].from, target: data.edges[i].to, label: data.edges[i].label }
-    });
+    elements.push({ data: { id: `e${i}`, source: data.edges[i].from, target: data.edges[i].to, label: data.edges[i].label } });
   }
+  return elements;
+}
 
+const CY_STYLE = [
+  {
+    selector: 'node',
+    style: {
+      'background-color': (ele) => NODE_COLORS[ele.data('type')] || NODE_COLORS.default,
+      'border-color': '#3a5060', 'border-width': 1,
+      'label': 'data(label)', 'color': '#c8d8e0',
+      'font-size': '10px', 'font-family': 'inherit',
+      'text-wrap': 'wrap', 'text-max-width': '80px',
+      'text-valign': 'center', 'text-halign': 'center',
+      'width': 'label', 'height': 'label', 'padding': '8px',
+      'shape': 'round-rectangle',
+    }
+  },
+  { selector: 'node[?hasChars]', style: { 'border-color': '#5090b0', 'border-width': 2, 'background-color': '#1a3a50' } },
+  {
+    selector: 'edge',
+    style: {
+      'width': 1, 'line-color': '#3a5060',
+      'target-arrow-color': '#3a5060', 'target-arrow-shape': 'none',
+      'curve-style': 'bezier', 'label': 'data(label)',
+      'font-size': '9px', 'color': '#6a8090',
+      'text-background-color': '#141b22', 'text-background-opacity': 1, 'text-background-padding': '2px',
+    }
+  }
+];
+
+function renderMapCytoscape(data, el) {
+  el.innerHTML = '<div class="cy-container" id="cy-map"></div>';
+  const cyEl = el.querySelector('#cy-map');
   if (typeof window.cytoscape === 'undefined') return;
-
   if (_cyInstance) { _cyInstance.destroy(); _cyInstance = null; }
-
   _cyInstance = window.cytoscape({
-    container: cyEl,
-    elements,
-    style: [
-      {
-        selector: 'node',
-        style: {
-          'background-color': (ele) => NODE_COLORS[ele.data('type')] || NODE_COLORS.default,
-          'border-color': '#3a5060',
-          'border-width': 1,
-          'label': 'data(label)',
-          'color': '#c8d8e0',
-          'font-size': '10px',
-          'font-family': 'inherit',
-          'text-wrap': 'wrap',
-          'text-max-width': '80px',
-          'text-valign': 'center',
-          'text-halign': 'center',
-          'width': 'label',
-          'height': 'label',
-          'padding': '8px',
-          'shape': 'round-rectangle',
-        }
-      },
-      {
-        selector: 'node[?hasChars]',
-        style: {
-          'border-color': '#5090b0',
-          'border-width': 2,
-          'background-color': '#1a3a50',
-        }
-      },
-      {
-        selector: 'edge',
-        style: {
-          'width': 1,
-          'line-color': '#3a5060',
-          'target-arrow-color': '#3a5060',
-          'target-arrow-shape': 'none',
-          'curve-style': 'bezier',
-          'label': 'data(label)',
-          'font-size': '9px',
-          'color': '#6a8090',
-          'text-background-color': '#141b22',
-          'text-background-opacity': 1,
-          'text-background-padding': '2px',
-        }
-      }
-    ],
+    container: cyEl, elements: _buildCytoscapeElements(data), style: CY_STYLE,
     layout: { name: 'cose', padding: 20, animate: false, nodeRepulsion: 4000, idealEdgeLength: 80 },
-    userZoomingEnabled: true,
-    userPanningEnabled: true,
-    boxSelectionEnabled: false,
-    autoungrabify: true,
+    userZoomingEnabled: true, userPanningEnabled: true, boxSelectionEnabled: false, autoungrabify: true,
+  });
+}
+
+function renderMapModal(data) {
+  const cyEl = document.getElementById('map-modal-cy');
+  if (!cyEl || typeof window.cytoscape === 'undefined') return;
+  if (_cyModalInstance) { _cyModalInstance.destroy(); _cyModalInstance = null; }
+  _cyModalInstance = window.cytoscape({
+    container: cyEl, elements: _buildCytoscapeElements(data), style: CY_STYLE,
+    layout: { name: 'cose', padding: 30, animate: false, nodeRepulsion: 5000, idealEdgeLength: 120 },
+    userZoomingEnabled: true, userPanningEnabled: true, boxSelectionEnabled: false, autoungrabify: true,
   });
 }
 
@@ -248,17 +232,25 @@ function setPanel(name, content) {
 
 function openMapModal() {
   const overlay = document.getElementById('map-modal-overlay');
+  // Populate raw data
   const asciiEl = document.getElementById('map-modal-ascii');
-  // Show raw map data in the ASCII tab for reference
-  asciiEl.textContent = _lastMapContent.replace(/^## PANEL:.*$/mg, '').trim() || '(No map yet — start session and wait for update)';
+  asciiEl.textContent = _lastMapContent.replace(/^## PANEL:.*$/mg, '').trim() || '(No map data yet)';
   // Restore saved URL/cookie inputs
   const savedUrl = localStorage.getItem('ddb-map-url') || '';
   const savedCookie = localStorage.getItem('ddb-cookie') || '';
   document.getElementById('ddb-url-input').value = savedUrl;
   document.getElementById('ddb-cookie-input').value = savedCookie;
-  // Default to VTT tab if a URL is saved and frame is loaded, else ASCII
+  // Render graph in modal
+  const mapData = _parseMapData(_lastMapContent);
+  if (mapData.nodes.length > 0) {
+    renderMapModal(mapData);
+  } else {
+    const cyEl = document.getElementById('map-modal-cy');
+    if (cyEl) cyEl.innerHTML = '<p style="color:var(--text3);padding:20px;font-size:12px">No map data yet — start session and wait for an AI update.</p>';
+  }
+  // Default to VTT tab if frame loaded, else graph
   const frame = document.getElementById('ddb-vtt-frame');
-  switchMapTab(frame.classList.contains('loaded') ? 'vtt' : 'ascii');
+  switchMapTab(frame.classList.contains('loaded') ? 'vtt' : 'graph');
   overlay.classList.add('open');
 }
 
@@ -302,10 +294,14 @@ function closeMapModal() {
 
 function switchMapTab(tab) {
   document.getElementById('map-tab-vtt').classList.toggle('hidden', tab !== 'vtt');
-  document.getElementById('map-tab-ascii').classList.toggle('hidden', tab !== 'ascii');
+  document.getElementById('map-tab-graph').classList.toggle('hidden', tab !== 'graph');
   document.querySelectorAll('.map-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
+  // Fit graph to container after it becomes visible
+  if (tab === 'graph' && _cyModalInstance) {
+    requestAnimationFrame(() => _cyModalInstance.fit(undefined, 30));
+  }
 }
 
 // ── Character selection ──
@@ -858,15 +854,38 @@ async function forceUpdate() {
   }
 }
 
-// ── End session ──
-async function endSession() {
-  if (!confirm('Archive this session and reset? The log will be saved.')) return;
+// ── Panel detail (fullscreen) ──
+function openPanelDetail(labelText, bodyEl) {
+  document.getElementById('panel-detail-title').textContent = labelText;
+  document.getElementById('panel-detail-body').innerHTML = bodyEl.innerHTML;
+  document.getElementById('panel-detail-overlay').classList.add('open');
+}
+function closePanelDetail() {
+  document.getElementById('panel-detail-overlay').classList.remove('open');
+}
+
+// ── End session modal ──
+function openEndModal() {
+  const check = document.getElementById('end-discard-check');
+  check.checked = false;
+  document.getElementById('btn-end-confirm').textContent = 'End & Archive';
+  document.getElementById('btn-end-confirm').className = 'btn-modal-save';
+  document.getElementById('end-session-overlay').classList.add('open');
+}
+function closeEndModal() {
+  document.getElementById('end-session-overlay').classList.remove('open');
+}
+async function confirmEndSession() {
+  const discard = document.getElementById('end-discard-check').checked;
+  closeEndModal();
   stopRecording();
-  const resp = await fetch('/api/session/end', { method: 'POST' });
+  const resp = await fetch('/api/session/end', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ discard }),
+  });
   const data = await resp.json();
-  let msg = 'Session archived.';
-  if (data.release_url) msg += `\n\nGitHub release:\n${data.release_url}`;
-  alert(msg);
+  if (!discard && data.release_url) alert(`Session archived.\n\nGitHub release:\n${data.release_url}`);
   sessionStart = null;
   document.getElementById('timer').textContent = '0:00:00';
   resetLogState();
@@ -1076,7 +1095,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Button bindings
   document.getElementById('rec-indicator').addEventListener('click', toggleRecording);
   document.getElementById('btn-update').addEventListener('click', forceUpdate);
-  document.getElementById('btn-end-session').addEventListener('click', endSession);
+  document.getElementById('btn-end-session').addEventListener('click', openEndModal);
+  document.getElementById('btn-end-cancel').addEventListener('click', closeEndModal);
+  document.getElementById('btn-end-confirm').addEventListener('click', confirmEndSession);
+  document.getElementById('end-session-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeEndModal(); });
+  document.getElementById('end-discard-check').addEventListener('change', e => {
+    const btn = document.getElementById('btn-end-confirm');
+    if (e.target.checked) {
+      btn.textContent = 'Discard Everything';
+      btn.className = 'btn-modal-save btn-modal-danger';
+    } else {
+      btn.textContent = 'End & Archive';
+      btn.className = 'btn-modal-save';
+    }
+  });
+  document.getElementById('panel-scene-header').addEventListener('click', () =>
+    openPanelDetail('Scene', document.getElementById('panel-scene-body')));
+  document.getElementById('panel-next-header').addEventListener('click', () =>
+    openPanelDetail('Next Steps', document.getElementById('panel-next-body')));
+  document.getElementById('panel-detail-close').addEventListener('click', closePanelDetail);
+  document.getElementById('panel-detail-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closePanelDetail(); });
   document.getElementById('btn-add-char').addEventListener('click', openAddChar);
   document.getElementById('btn-save-char').addEventListener('click', saveCharacter);
   document.getElementById('btn-cancel-char').addEventListener('click', closeModal);

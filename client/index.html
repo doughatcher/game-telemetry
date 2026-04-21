@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>DnD Stage</title>
+  <title>Adventure Log</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://cdn.jsdelivr.net/npm/cytoscape@3/dist/cytoscape.min.js"></script>
 </head>
@@ -12,7 +12,7 @@
 <!-- Session start overlay (shown when no active session) -->
 <div id="start-overlay">
   <div id="start-box">
-    <div id="start-title">&#9876; DnD Stage</div>
+    <div id="start-title">&#9876; Adventure Log</div>
     <p>No session in progress.</p>
     <button id="btn-start-session">&#9654; Start New Session</button>
     <button id="btn-start-load-history">&#8635; Load Past Session</button>
@@ -36,7 +36,7 @@
 </div>
 
 <div id="header">
-  <span id="header-title">&#9876;</span>
+  <span id="header-title">&#9876; Adventure Log</span>
   <input id="session-name" type="text" placeholder="Session name…" value="The Adventure Begins" spellcheck="false">
   <div class="header-sep"></div>
   <div id="rec-indicator" role="button" title="Click or R to toggle recording">
@@ -82,9 +82,10 @@
   <!-- Right: Scene / Map / Next -->
   <div id="col-right">
     <div class="panel" id="panel-scene">
-      <div class="panel-header">
+      <div class="panel-header panel-header-clickable" id="panel-scene-header" title="Click to expand">
         <span class="panel-icon">&#9672;</span>
         <span class="panel-label">Scene</span>
+        <span class="panel-expand-hint">&#8599;</span>
       </div>
       <div class="panel-body" id="panel-scene-body"><span style="color:var(--text3)">Awaiting session…</span></div>
     </div>
@@ -97,9 +98,10 @@
       <div class="panel-body" id="panel-map-body"><span style="color:var(--text3)">No map yet.</span></div>
     </div>
     <div class="panel" id="panel-next">
-      <div class="panel-header">
+      <div class="panel-header panel-header-clickable" id="panel-next-header" title="Click to expand">
         <span class="panel-icon">&#8594;</span>
         <span class="panel-label">Next</span>
+        <span class="panel-expand-hint">&#8599;</span>
       </div>
       <div class="panel-body" id="panel-next-body"><span style="color:var(--text3)">Start session to get suggestions.</span></div>
     </div>
@@ -113,7 +115,7 @@
       <span id="map-modal-title">&#8862; Map</span>
       <div id="map-modal-tabs">
         <button class="map-tab" data-tab="vtt">D&amp;D Beyond</button>
-        <button class="map-tab active" data-tab="ascii">Map Data</button>
+        <button class="map-tab active" data-tab="graph">Graph</button>
       </div>
       <button id="map-modal-close">&#10005;</button>
     </div>
@@ -127,8 +129,12 @@
       </div>
       <iframe id="ddb-vtt-frame" src="about:blank" allowfullscreen></iframe>
     </div>
-    <div id="map-tab-ascii" class="map-tab-content">
-      <pre id="map-modal-ascii"></pre>
+    <div id="map-tab-graph" class="map-tab-content">
+      <div id="map-modal-cy"></div>
+      <details id="map-modal-raw">
+        <summary>Raw map data</summary>
+        <pre id="map-modal-ascii"></pre>
+      </details>
     </div>
   </div>
 </div>
@@ -208,6 +214,33 @@
     </div>
     <p id="decision-context"></p>
     <div id="decision-options"></div>
+  </div>
+</div>
+
+<!-- Panel detail (fullscreen) modal -->
+<div id="panel-detail-overlay">
+  <div id="panel-detail-modal">
+    <div id="panel-detail-header">
+      <span id="panel-detail-title"></span>
+      <button id="panel-detail-close">&#10005;</button>
+    </div>
+    <div id="panel-detail-body"></div>
+  </div>
+</div>
+
+<!-- End session confirm modal -->
+<div id="end-session-overlay">
+  <div id="end-session-modal">
+    <h2>End Session</h2>
+    <p>Archive this session — save panels, transcript, and recording to git, then reset for next time.</p>
+    <label id="end-discard-label">
+      <input type="checkbox" id="end-discard-check">
+      Discard session data — do not save or archive anything
+    </label>
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" id="btn-end-cancel">Cancel</button>
+      <button class="btn-modal-save" id="btn-end-confirm">End &amp; Archive</button>
+    </div>
   </div>
 </div>
 

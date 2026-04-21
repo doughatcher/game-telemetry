@@ -1,3 +1,7 @@
 ## PANEL: next-steps
 
-*Start the session to get suggestions.*
+* Question Duren about patrons
+* Purchase rations and navigational charts
+* Investigate local guild headquarters
+* Granit: Purchase holy symbols
+* Vargr: Buy exotic performance materials
