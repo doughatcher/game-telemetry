@@ -10,8 +10,6 @@ The campaign takes place across a world of sea trade, ancient ruins, and politic
 - **Lyvriele Enafrya** — Eladrin, Fighter / Samurai XGtE (player: dpottergg)
 - **Rides the Wake** — Human, Barbarian / Path of the Berserker (player: superterran)
 - **Vargr Stormcaller, the Melodious** — Goliath, Bard / College of Spirits VRGtR (player: chrispotter)
-- **Edwin** — class/race TBD (player unknown)
-
 DM: TheShantyman (DnD Beyond campaign)
 
 ## Campaign Tone
