@@ -149,7 +149,11 @@ def generate_journal(archive: Path, state: dict, history: str) -> str:
 def write_session_page(archive_name: str, prose: str, state: dict) -> Path:
     session_name = state.get("session_name") or "Session"
     location = state.get("location") or ""
-    date_str = archive_name[:10]  # "2026-04-20"
+    # Archive directories are expected to be named YYYY-MM-DD-..., but tolerate
+    # legacy/test names by falling back to today's date so Hugo can still build.
+    date_str = archive_name[:10]
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_str):
+        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     post = frontmatter.Post(
         prose,
