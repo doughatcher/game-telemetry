@@ -1,5 +1,5 @@
 ---
-date: adventurerT00:00:00Z
+date: 2026-04-26T00:00:00Z
 location: ''
 source_archive: adventurer-poc-test-101228
 title: Session
